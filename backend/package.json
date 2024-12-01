@@ -1,0 +1,31 @@
+{
+  "name": "otp-verification-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsc -b",
+    "start": "npm run dev && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/otp-generator": "^4.0.2",
+    "prisma": "^5.20.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sns": "^3.670.0",
+    "@prisma/client": "^5.20.0",
+    "aws-sdk": "^2.1691.0",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "otp-generator": "^4.0.1"
+  }
+}
