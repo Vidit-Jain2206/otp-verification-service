@@ -15,7 +15,7 @@ export const generateApiKey = async (
       throw new ApiError("Missing required fields", 400);
     }
     if (!user) {
-      throw new Error("Unauthorized Access");
+      throw new ApiError("Unauthorized Access", 403);
     }
     const userExists = await client.user.findFirst({
       where: {
@@ -23,7 +23,7 @@ export const generateApiKey = async (
       },
     });
     if (!userExists) {
-      throw new Error("User not found");
+      throw new ApiError("User not found", 400);
     }
     const apiKeyCount = await client.api_key.findMany({
       where: {
@@ -54,7 +54,12 @@ export const generateApiKey = async (
     if (!apiKey) {
       throw new ApiError("Failed to generate API key", 500);
     }
-    res.status(200).json({ apiKey: apiKey.api_key });
+    res
+      .status(200)
+      .json({
+        apiKey: apiKey.api_key,
+        message: "Api Key generated successfully",
+      });
   } catch (error) {
     if (error instanceof ApiError) {
       res.status(error.status).json({ error: error.message });
