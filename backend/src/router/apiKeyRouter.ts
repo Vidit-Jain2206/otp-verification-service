@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticateJWT } from "../middleware/authenticate";
+import { authenticateJWT } from "../middleware/authenticateJWT";
 import { generateApiKey } from "../controllers/apiKey/generateApiKey";
 import { deleteApiKey } from "../controllers/apiKey/deleteApiKey";
 import { getAllApiKey } from "../controllers/apiKey/getAllApiKey";

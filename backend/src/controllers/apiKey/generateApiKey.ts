@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthenticatedRequest } from "../../middleware/authenticate";
+import { AuthenticatedRequest } from "../../middleware/authenticateJWT";
 import { client } from "../../client";
 import { ApiError } from "../../utils/ApiError";
 import crypto from "crypto";
@@ -54,12 +54,10 @@ export const generateApiKey = async (
     if (!apiKey) {
       throw new ApiError("Failed to generate API key", 500);
     }
-    res
-      .status(200)
-      .json({
-        apiKey: apiKey.api_key,
-        message: "Api Key generated successfully",
-      });
+    res.status(200).json({
+      apiKey: apiKey.api_key,
+      message: "Api Key generated successfully",
+    });
   } catch (error) {
     if (error instanceof ApiError) {
       res.status(error.status).json({ error: error.message });

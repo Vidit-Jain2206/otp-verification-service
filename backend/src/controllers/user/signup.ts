@@ -49,7 +49,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         httpOnly: true,
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24 * 30), // 30 days
       })
-      .json(user);
+      .json({ user, message: "Signup successful" });
   } catch (error) {
     if (error instanceof ApiError) {
       res.status(error.status).json({ error: error.message });
