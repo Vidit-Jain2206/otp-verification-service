@@ -11,7 +11,7 @@ const client = new SNSClient({
 export const sendOtpNotification = async (otp: string, phoneNumber: string) => {
   try {
     const command = new PublishCommand({
-      PhoneNumber: `+91${phoneNumber}`,
+      PhoneNumber: `${phoneNumber}`,
       Message: `Your OTP is ${otp}`,
     });
 

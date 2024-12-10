@@ -41,7 +41,13 @@ export const login = async (req: Request, res: Response): Promise<any> => {
         httpOnly: true,
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24 * 30), // 30 days
       })
-      .json({ user: isExists, message: "Signin successfully" });
+      .json({
+        user: {
+          email: isExists.email,
+          username: isExists.username,
+        },
+        message: "Signin successfully",
+      });
   } catch (error) {
     if (error instanceof ApiError) {
       res.status(error.status).json({ error: error.message });

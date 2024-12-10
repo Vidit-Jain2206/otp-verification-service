@@ -23,7 +23,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         updated_at: true,
       },
     });
-    if (!isExists) {
+    if (isExists) {
       throw new ApiError("Email already exists", 409);
     }
     const hashedPassword: string = await bcryptjs.hash(password, 10);
@@ -37,7 +37,6 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
     if (!user) {
       throw new ApiError("Failed to create user", 500);
     }
-
     const token: string = jwt.sign(
       { id: user.id, username: user.username, email: user.email },
       process.env.JWT_SECRET!
@@ -49,7 +48,13 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
         httpOnly: true,
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24 * 30), // 30 days
       })
-      .json({ user, message: "Signup successful" });
+      .json({
+        user: {
+          email: user.email,
+          username: user.username,
+        },
+        message: "Signup successful",
+      });
   } catch (error) {
     if (error instanceof ApiError) {
       res.status(error.status).json({ error: error.message });

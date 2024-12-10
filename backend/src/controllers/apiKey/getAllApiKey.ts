@@ -26,6 +26,21 @@ export const getAllApiKey = async (
         user_id: userExists.id,
         revoked_at: null,
       },
+      select: {
+        api_key: true,
+        custom_msg: true,
+        otp_expiration_time: true,
+        revoked_at: true,
+        created_at: true,
+        otp_count: true,
+        user: {
+          select: {
+            username: true,
+            email: true,
+            created_at: true,
+          },
+        },
+      },
     });
     if (apiKeys.length < 0) {
       throw new ApiError(`Could not find apikeys for this user`, 500);
@@ -33,7 +48,7 @@ export const getAllApiKey = async (
 
     res.status(200).json({
       apiKeys: apiKeys,
-      message: "Api Key has been revoked successfully",
+      message: "Api Key has been fetched successfully",
     });
   } catch (error) {
     if (error instanceof ApiError) {

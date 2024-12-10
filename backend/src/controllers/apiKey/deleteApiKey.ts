@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/authenticateJWT";
 import { client } from "../../client";
 import { ApiError } from "../../utils/ApiError";
-
+import crypto from "crypto";
 export const deleteApiKey = async (
   req: AuthenticatedRequest,
   res: Response
@@ -25,20 +25,26 @@ export const deleteApiKey = async (
     if (!userExists) {
       throw new Error("User not found");
     }
+
+    const hashedApiKey = crypto
+      .createHash("sha256")
+      .update(apiId)
+      .digest("hex");
+
     const apiKey = await client.api_key.findFirst({
       where: {
-        id: apiId,
+        api_key: hashedApiKey,
       },
     });
     if (!apiKey) {
       throw new ApiError("ApiId is invalid", 403);
     }
-    if (!apiKey.revoked_at) {
+    if (apiKey?.revoked_at) {
       throw new ApiError("Api Key has already been revoked", 403);
     }
     const isDeleted = await client.api_key.update({
       where: {
-        id: apiId,
+        id: apiKey.id,
       },
       data: {
         revoked_at: new Date(),
@@ -48,7 +54,7 @@ export const deleteApiKey = async (
       throw new ApiError("Failed to revoke Api Key", 500);
     }
     res.status(200).json({
-      apiKey: apiKey.api_key,
+      apiKey: hashedApiKey,
       message: "Api Key has been revoked successfully",
     });
   } catch (error) {

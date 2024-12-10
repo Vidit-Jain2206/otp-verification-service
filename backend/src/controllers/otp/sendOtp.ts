@@ -14,7 +14,7 @@ import { ApiError } from "../../utils/ApiError";
 
 export const sendOtp = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { phoneNumber } = req.body;
+    const { phoneNumber }: { phoneNumber: string } = req.body;
     if (!phoneNumber) throw new ApiError(`Phone number is required`, 400);
     const apiKey: string = req.headers["api-key"] as string;
     const apiDetails = await client.api_key.findFirst({

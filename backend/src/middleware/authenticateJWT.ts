@@ -16,7 +16,7 @@ export const authenticateJWT = async (
   next: NextFunction
 ) => {
   try {
-    const token: string = req.cookies("access_token");
+    const token: string = req.cookies["access_token"];
     if (!token) {
       throw new ApiError("Access denied, no token provided", 403);
     }

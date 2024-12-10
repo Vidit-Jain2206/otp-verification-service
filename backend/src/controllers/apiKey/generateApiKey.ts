@@ -32,7 +32,7 @@ export const generateApiKey = async (
       },
     });
     const maxCount: number = Number(process.env.MAX_API_KEYS_PER_USER);
-    if (apiKeyCount.length > maxCount) {
+    if (apiKeyCount.length >= maxCount) {
       throw new ApiError("Maximum API keys reached", 400);
     }
     const api_key_length = Number(process.env.API_KEY_LENGTH);
@@ -55,7 +55,7 @@ export const generateApiKey = async (
       throw new ApiError("Failed to generate API key", 500);
     }
     res.status(200).json({
-      apiKey: apiKey.api_key,
+      apiKey: rawApiKey,
       message: "Api Key generated successfully",
     });
   } catch (error) {

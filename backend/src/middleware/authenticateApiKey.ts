@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError";
 import { client } from "../client";
-
+import crypto from "crypto";
 export const authenticateJWT = async (
   req: Request,
   res: Response,
@@ -13,6 +13,7 @@ export const authenticateJWT = async (
     if (!api_key) {
       throw new ApiError("API Key is required", 401);
     }
+
     const apiKey = await client.api_key.findFirst({
       where: {
         api_key: api_key,
