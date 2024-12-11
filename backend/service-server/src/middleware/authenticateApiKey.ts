@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError";
 import { client } from "../client";
 import crypto from "crypto";
-export const authenticateJWT = async (
+export const authenticateApiKey = async (
   req: Request,
   res: Response,
   next: NextFunction

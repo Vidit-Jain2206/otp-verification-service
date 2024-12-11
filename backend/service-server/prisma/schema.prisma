@@ -12,16 +12,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-model User {
-  id                  String   @id @default(cuid()) 
-  username                String   
-  email               String   @unique 
-  password            String   
-  created_at           DateTime @default(now()) 
-  updated_at           DateTime @updatedAt 
-  apiKeys             Api_key[] 
-  otps                Otp[]     
-}
 
 model Api_key {
   id            String   @id @default(cuid()) 
@@ -33,16 +23,5 @@ model Api_key {
   custom_msg          String  
   otp_expiration_time Int    
   user         User    @relation(fields: [user_id], references: [id], onDelete: Cascade) 
-}
-
-model Otp {
-  id        String   @id @default(cuid()) 
-  otp       String   
-  user_id    String   
-  api_key    String   
-  verified  Boolean  @default(false) 
-  ttl       Int      
-  created_at DateTime @default(now()) 
-  user      User    @relation(fields: [user_id], references: [id], onDelete: Cascade) 
 }
 
