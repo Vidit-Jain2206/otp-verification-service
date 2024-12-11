@@ -1,10 +1,24 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError";
 import { client } from "../client";
 import crypto from "crypto";
+
+export interface AuthenticatedRequest extends Request {
+  apiDetails: {
+    api_key: string;
+    id: string;
+    user_id: string;
+    created_at: Date;
+    revoked_at: Date | null;
+    otp_count: number;
+    custom_msg: string;
+    otp_expiration_time: number;
+  };
+  apiKey: string;
+}
+
 export const authenticateApiKey = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
@@ -13,10 +27,13 @@ export const authenticateApiKey = async (
     if (!api_key) {
       throw new ApiError("API Key is required", 401);
     }
-
+    const hashedApiKey = crypto
+      .createHash("sha256")
+      .update(api_key)
+      .digest("hex");
     const apiKey = await client.api_key.findFirst({
       where: {
-        api_key: api_key,
+        api_key: hashedApiKey,
       },
     });
     if (!apiKey) {
@@ -27,6 +44,8 @@ export const authenticateApiKey = async (
     if (revokedTime && revokedTime.getTime() < now) {
       throw new ApiError("API Key has been revoked", 401);
     }
+    req.apiDetails = apiKey;
+    req.apiKey = api_key;
     next();
   } catch (error) {
     if (error instanceof ApiError) {

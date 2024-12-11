@@ -27,7 +27,11 @@ export async function storeOtp(apiKey: string, otp: string, ttl: number) {
   await redis.set(`otp:${apiKey}`, JSON.stringify(otpData), "EX", ttl / 1000);
 }
 
-export async function verifyOtp(apiKey: string, otp: string, ttl: number) {
+export async function verifyOtpInRedis(
+  apiKey: string,
+  otp: string,
+  ttl: number
+) {
   const storedOtpJson = await redis.get(`otp:${apiKey}`);
 
   if (!storedOtpJson) {
