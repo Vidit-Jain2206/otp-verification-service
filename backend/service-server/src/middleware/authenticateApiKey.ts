@@ -3,22 +3,8 @@ import { ApiError } from "../utils/ApiError";
 import { client } from "../client";
 import crypto from "crypto";
 
-export interface AuthenticatedRequest extends Request {
-  apiDetails: {
-    api_key: string;
-    id: string;
-    user_id: string;
-    created_at: Date;
-    revoked_at: Date | null;
-    otp_count: number;
-    custom_msg: string;
-    otp_expiration_time: number;
-  };
-  apiKey: string;
-}
-
 export const authenticateApiKey = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -27,13 +13,9 @@ export const authenticateApiKey = async (
     if (!api_key) {
       throw new ApiError("API Key is required", 401);
     }
-    const hashedApiKey = crypto
-      .createHash("sha256")
-      .update(api_key)
-      .digest("hex");
     const apiKey = await client.api_key.findFirst({
       where: {
-        api_key: hashedApiKey,
+        api_key: api_key,
       },
     });
     if (!apiKey) {

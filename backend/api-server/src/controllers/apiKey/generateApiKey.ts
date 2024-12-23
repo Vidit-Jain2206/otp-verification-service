@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../../middleware/authenticateJWT";
 import { client } from "../../client";
 import { ApiError } from "../../utils/ApiError";
 import crypto from "crypto";
+import { encode } from "../../helpers/encode";
 
 export const generateApiKey = async (
   req: AuthenticatedRequest,
@@ -37,15 +38,12 @@ export const generateApiKey = async (
     }
     const api_key_length = Number(process.env.API_KEY_LENGTH);
     const rawApiKey = crypto.randomBytes(api_key_length).toString("hex");
-    const hashedApiKey = crypto
-      .createHash("sha256")
-      .update(rawApiKey)
-      .digest("hex");
+    // const hashedApiKey = await encode(rawApiKey);
 
     const apiKey = await client.api_key.create({
       data: {
         user_id: userExists.id,
-        api_key: hashedApiKey,
+        api_key: rawApiKey,
         custom_msg,
         otp_expiration_time,
         revoked_at: null,

@@ -1,38 +1,42 @@
 import Redis from "ioredis";
 
-const redis = new Redis("");
+const url = process.env.REDIS_URL || "";
+const redis = new Redis("127.0.0.1:6379");
 enum OtpStatus {
   PENDING = "pending",
   VERIFIED = "verified",
   EXPIRED = "expired",
 }
 
-interface OtpData {
-  otp: string;
-  status: OtpStatus;
-  createdAt: number;
-  apiKey: string;
-  attempts: number;
-  otpExpiration: Date;
-}
-export async function storeOtp(apiKey: string, otp: string, ttl: number) {
+export async function storeOtp(
+  apiKey: string,
+  phoneNumber: string,
+  otp: string,
+  ttl: number
+) {
   const otpData: OtpData = {
     otp,
     status: OtpStatus.PENDING,
-    createdAt: Date.now(),
+    createdAt: new Date(Date.now()),
     apiKey: apiKey,
     attempts: 0,
     otpExpiration: new Date(Date.now() + ttl),
   };
-  await redis.set(`otp:${apiKey}`, JSON.stringify(otpData), "EX", ttl / 1000);
+  await redis.set(
+    `otp:${apiKey}:${phoneNumber}`,
+    JSON.stringify(otpData),
+    "EX",
+    ttl / 1000
+  );
 }
 
 export async function verifyOtpInRedis(
   apiKey: string,
+  phoneNumber: string,
   otp: string,
   ttl: number
 ) {
-  const storedOtpJson = await redis.get(`otp:${apiKey}`);
+  const storedOtpJson = await redis.get(`otp:${apiKey}:${phoneNumber}`);
 
   if (!storedOtpJson) {
     return {
@@ -44,13 +48,20 @@ export async function verifyOtpInRedis(
   const storedOtpData: OtpData = JSON.parse(storedOtpJson);
 
   // Verify OTP
+  if (storedOtpData.attempts >= 3) {
+    await redis.del(`otp:${apiKey}:${phoneNumber}`);
+    return {
+      success: false,
+      message: "OTP Expired or Not Found",
+    };
+  }
   if (
     storedOtpData.otp === otp &&
-    new Date(storedOtpData.otpExpiration).getTime() < Date.now()
+    new Date(storedOtpData.otpExpiration).getTime() >= Date.now()
   ) {
     // Update status to verified
     await redis.set(
-      `otp:${apiKey}`,
+      `otp:${apiKey}:${phoneNumber}`,
       JSON.stringify({
         ...storedOtpData,
         status: OtpStatus.VERIFIED,
@@ -60,7 +71,7 @@ export async function verifyOtpInRedis(
     );
 
     // Delete OTP from Redis
-    await redis.del(`otp:${apiKey}`);
+    await redis.del(`otp:${apiKey}:${phoneNumber}`);
 
     return {
       success: true,
@@ -74,7 +85,7 @@ export async function verifyOtpInRedis(
     };
 
     await redis.set(
-      `otp:${apiKey}`,
+      `otp:${apiKey}:${phoneNumber}`,
       JSON.stringify(updatedOtpData),
       "EX",
       ttl / 1000

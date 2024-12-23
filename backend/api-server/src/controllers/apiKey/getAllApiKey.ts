@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/authenticateJWT";
 import { client } from "../../client";
 import { ApiError } from "../../utils/ApiError";
+import { decode } from "../../helpers/encode";
 
 export const getAllApiKey = async (
   req: AuthenticatedRequest,
@@ -27,6 +28,7 @@ export const getAllApiKey = async (
         revoked_at: null,
       },
       select: {
+        id: true,
         api_key: true,
         custom_msg: true,
         otp_expiration_time: true,
@@ -45,6 +47,14 @@ export const getAllApiKey = async (
     if (apiKeys.length < 0) {
       throw new ApiError(`Could not find apikeys for this user`, 500);
     }
+    // const response = apiKeys.map(async (item) => {
+    //   return {
+    //     ...item,
+    //     api_key: await decode(item.api_key),
+    //   };
+    // });
+
+    // const result = await Promise.all(response);
 
     res.status(200).json({
       apiKeys: apiKeys,

@@ -20,7 +20,6 @@ model User {
   created_at           DateTime @default(now()) 
   updated_at           DateTime @updatedAt 
   apiKeys             Api_key[] 
-  otps                Otp[]     
 }
 
 model Api_key {

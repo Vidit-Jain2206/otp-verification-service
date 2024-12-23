@@ -4,14 +4,14 @@ import { decode } from "../../helpers/encode";
 import { ApiError } from "../../utils/ApiError";
 import crypto from "crypto";
 import { verifyOtpInRedis } from "../../redis";
-import { AuthenticatedRequest } from "../../middleware/authenticateApiKey";
+
 // 1. accepts the otp, verificationKey
 // 2. verify the verificationKey :- check phone number
 // 3. verify the otp with expiration time :- if expired return expired and remove the entry from database
 // if already verified:- return already verified
 // 4. if verified: remove the entry from database and return success
 
-export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
+export const verifyOtp = async (req: Request, res: Response) => {
   try {
     const { otp, verificationId, check } = req.body;
     if (!otp || !verificationId || !check) {
@@ -32,6 +32,7 @@ export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
 
     if (!apiDetails) throw new ApiError(`Invalid api-key`, 400);
     if (!apiKey) throw new ApiError(`Invalid api-key`, 400);
+
     var encodedVerificationKey = await decode(verificationId);
     if (!encodedVerificationKey) {
       throw new ApiError("Invalid verification", 404);
@@ -43,6 +44,7 @@ export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
 
     const response = await verifyOtpInRedis(
       apiKey,
+      check,
       otp,
       apiDetails.otp_expiration_time
     );
@@ -52,6 +54,7 @@ export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
       res.status(error.status).json({ error: error.message });
       return;
     }
+    console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

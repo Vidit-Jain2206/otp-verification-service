@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../../middleware/authenticateJWT";
 import { client } from "../../client";
 import { ApiError } from "../../utils/ApiError";
-import crypto from "crypto";
+
 export const deleteApiKey = async (
   req: AuthenticatedRequest,
   res: Response
@@ -26,14 +26,9 @@ export const deleteApiKey = async (
       throw new Error("User not found");
     }
 
-    const hashedApiKey = crypto
-      .createHash("sha256")
-      .update(apiId)
-      .digest("hex");
-
     const apiKey = await client.api_key.findFirst({
       where: {
-        api_key: hashedApiKey,
+        id: apiId,
       },
     });
     if (!apiKey) {
@@ -54,7 +49,6 @@ export const deleteApiKey = async (
       throw new ApiError("Failed to revoke Api Key", 500);
     }
     res.status(200).json({
-      apiKey: hashedApiKey,
       message: "Api Key has been revoked successfully",
     });
   } catch (error) {

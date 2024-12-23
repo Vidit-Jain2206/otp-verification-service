@@ -13,8 +13,8 @@ import { sendOtpNotification } from "../../helpers/SNSclient";
 import { ApiError } from "../../utils/ApiError";
 import { storeOtp } from "../../redis";
 import crypto from "crypto";
-import { AuthenticatedRequest } from "../../middleware/authenticateApiKey";
-export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
+
+export const sendOtp = async (req: Request, res: Response) => {
   try {
     const { phoneNumber }: { phoneNumber: string } = req.body;
     if (!phoneNumber) throw new ApiError(`Phone number is required`, 400);
@@ -45,7 +45,7 @@ export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
       throw new ApiError(`Custom message is not set in API key`, 400);
     }
 
-    await sendOtpNotification(otp, phoneNumber, apiDetails.custom_msg);
+    // await sendOtpNotification(otp, phoneNumber, apiDetails.custom_msg);
     var details = {
       timestamp: Date.now(),
       check: phoneNumber,
@@ -53,7 +53,7 @@ export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
       message: "OTP sent to user",
     };
 
-    await storeOtp(apiKey, otp, apiDetails.otp_expiration_time);
+    await storeOtp(apiKey, phoneNumber, otp, apiDetails.otp_expiration_time);
     const encoded = await encode(JSON.stringify(details));
     res
       .status(200)
@@ -63,6 +63,7 @@ export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
       res.status(error.status).json({ error: error.message });
       return;
     }
+    console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
