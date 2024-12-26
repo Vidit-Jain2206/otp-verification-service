@@ -45,7 +45,7 @@ export const sendOtp = async (req: Request, res: Response) => {
       throw new ApiError(`Custom message is not set in API key`, 400);
     }
 
-    // await sendOtpNotification(otp, phoneNumber, apiDetails.custom_msg);
+    await sendOtpNotification(otp, phoneNumber, apiDetails.custom_msg);
     var details = {
       timestamp: Date.now(),
       check: phoneNumber,

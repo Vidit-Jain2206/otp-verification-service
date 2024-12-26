@@ -18,7 +18,6 @@ export const sendOtpNotification = async (
       PhoneNumber: `${phoneNumber}`,
       Message: `${custom_msg} ${otp}`,
     });
-
     await client.send(command);
   } catch (error) {
     throw error;
