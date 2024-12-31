@@ -1,17 +1,38 @@
-import { useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import "./App.css";
+// src/App.tsx
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { useAuth, AuthProvider } from "./context/authContext";
+import LoginRegister from "./components/Login";
+import Dashboard from "./components/Dashboard";
 
-function App() {
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/" />;
+};
+
+const App = () => {
   return (
-    <>
-      <BrowserRouter>
+    <AuthProvider>
+      <Router>
         <Routes>
-          <Route path="/"></Route>
+          <Route path="/" element={<LoginRegister />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </BrowserRouter>
-    </>
+      </Router>
+    </AuthProvider>
   );
-}
+};
 
 export default App;
