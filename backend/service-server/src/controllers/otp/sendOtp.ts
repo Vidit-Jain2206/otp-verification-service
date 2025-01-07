@@ -9,10 +9,9 @@ import { Response, Request } from "express";
 import { client } from "../../client";
 import { generate } from "otp-generator";
 import { encode } from "../../helpers/encode";
-import { sendOtpNotification } from "../../helpers/SNSclient";
 import { ApiError } from "../../utils/ApiError";
 import { storeOtp } from "../../redis";
-import crypto from "crypto";
+import { addJobInQueue } from "../../sending-sms-worker/producer";
 
 export const sendOtp = async (req: Request, res: Response) => {
   try {
@@ -45,7 +44,6 @@ export const sendOtp = async (req: Request, res: Response) => {
       throw new ApiError(`Custom message is not set in API key`, 400);
     }
 
-    await sendOtpNotification(otp, phoneNumber, apiDetails.custom_msg);
     var details = {
       timestamp: Date.now(),
       check: phoneNumber,
@@ -54,6 +52,10 @@ export const sendOtp = async (req: Request, res: Response) => {
     };
 
     await storeOtp(apiKey, phoneNumber, otp, apiDetails.otp_expiration_time);
+
+    //push this into the queue
+    await addJobInQueue(otp, phoneNumber, apiDetails.custom_msg);
+
     const encoded = await encode(JSON.stringify(details));
     res
       .status(200)
